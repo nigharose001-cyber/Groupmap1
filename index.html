@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>GroupMap</title>
+<style>
+  body { font-family: sans-serif; margin: 0; padding: 20px; max-width: 400px; margin: 0 auto; }
+  input, button { width: 100%; padding: 12px; margin-top: 10px; font-size: 16px; box-sizing: border-box; }
+  .screen { display: none; }
+  .screen.active { display: block; }
+  #status { color: #555; font-size: 14px; margin-top: 20px; }
+</style>
+</head>
+<body>
+
+<div id="home" class="screen active">
+  <h1>GroupMap</h1>
+  <input id="name" placeholder="Your name">
+  <button onclick="show('map')">Create Group</button>
+  <hr style="margin:30px 0">
+  <input placeholder="6-digit group code">
+  <button>Join Group</button>
+</div>
+
+<div id="map" class="screen">
+  <h2>Live Map</h2>
+  <p>Map goes here (Days 10-12)</p>
+  <button onclick="show('members')">Members</button>
+  <button onclick="show('home')">Leave</button>
+</div>
+
+<div id="members" class="screen">
+  <h2>Members (0/15)</h2>
+  <p>Example user: 12.4 km away</p>
+  <button onclick="show('map')">Back to map</button>
+</div>
+
+<p id="status">Signing in...</p>
+
+<script>
+  function show(id) {
+    document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+  }
+</script>
+
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getAuth, signInAnonymously, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js";
+
+  // PASTE YOUR 4 FIREBASE VALUES BELOW (keep the quotes)
+  const firebaseConfig = {
+    apiKey: "PASTE_API_KEY",
+    authDomain: "PASTE_AUTH_DOMAIN",
+    projectId: "PASTE_PROJECT_ID",
+    appId: "PASTE_APP_ID"
+  };
+
+  const status = document.getElementById("status");
+  try {
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    onAuthStateChanged(auth, (user) => {
+      if (user) {
+        status.textContent = "Signed in (anonymous). ID: " + user.uid.slice(0, 6) + "...";
+      } else {
+        signInAnonymously(auth).catch(e => status.textContent = "Login failed: " + e.message);
+      }
+    });
+  } catch (e) {
+    status.textContent = "Error: " + e.message;
+  }
+</script>
+
+</body>
+</html>
